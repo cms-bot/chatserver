@@ -2,7 +2,7 @@
  * @Author: 快出来了哦
  * @Date: 2023-09-20 14:09:36
  * @LastEditors: 快出来了哦
- * @LastEditTime: 2023-09-22 13:30:20
+ * @LastEditTime: 2023-09-24 14:30:17
  * @FilePath: /chatserver/include/server/chatservice.hpp
  * @Description: 
  */
@@ -20,6 +20,7 @@ using namespace muduo::net;
 #include "usermodel.hpp"
 #include "offlinemessagemodel.hpp"
 #include "friendmodel.hpp"
+#include "groupmodel.hpp"
 #include "json.hpp"
 using json = nlohmann::json;
 
@@ -41,6 +42,14 @@ public:
     void oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time);
     //添加好友义务
     void addFriend(const TcpConnectionPtr &conn, json &js, Timestamp time);
+    //创建群组业务
+    void createGroup(const TcpConnectionPtr &conn, json &js, Timestamp time);
+    //加入群组业务
+    void addGroup(const TcpConnectionPtr &conn, json &js, Timestamp time);
+    //群组聊天业务
+    void groupChat(const TcpConnectionPtr &conn, json &js, Timestamp time);
+    //处理注销义务
+    void loginout(const TcpConnectionPtr &conn, json &js, Timestamp time);
     //处理客户端异常退出
     void clientCloseException(const TcpConnectionPtr& conn);
     //服务器异常终止，接到ctrl+c,重置状态
@@ -53,16 +62,16 @@ private:
 
     //储存消息id及其业务处理方法
     std::unordered_map<int,MsgHandler> _msghandleMap;
+    //保存客户端在线的连接
+    std::unordered_map<int,TcpConnectionPtr> _userConnMap;
+    //互斥锁，保证线程安全
+    std::mutex _connMutex;
 
     //数据操作类对象
     UserModel _usermodel;
     OfflinemsgModel _offlinMsgModel;
     FriendModel _friendModel;
-
-    //保存客户端在线的连接
-    std::unordered_map<int,TcpConnectionPtr> _userConnMap;
-    //互斥锁，保证线程安全
-    std::mutex _connMutex;
+    GroupModel _groupModel;
 
 };
 
